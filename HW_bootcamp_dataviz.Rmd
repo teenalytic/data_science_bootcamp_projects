@@ -1,0 +1,124 @@
+---
+title: "Homework_sale_performance"
+author: "Teetat"
+date: "2023-05-14"
+output: html_document
+---
+
+# Datacamp07: Data visualisation
+
+**Created 5 data visualisation chart for analyse sale performance from public dataset.**
+
+[Download dataset: sales_data_sample.csv](https://www.kaggle.com/kyanyoga)
+
+## Data preperation 
+`library(tidyverse)` for data transformation and `library(janitor)` for clean name of datasets to R standard.
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(janitor)
+df <- clean_names(read_csv("sales_data_sample.csv")) 
+glimpse(df)
+```
+
+## Chart 1 : Summary sales in 2003-2005
+```{r message=FALSE, warning=FALSE}
+library(scales)
+df %>%
+  group_by(year_id) %>%
+  summarise(sum_sale = sum(sales)) %>%
+  ggplot(aes(year_id,sum_sale, label = sum_sale)) +
+  geom_col(fill = c("#99ff99","#4d94ff","#ff8080")) + 
+  theme_minimal() + 
+  coord_cartesian(ylim = c(1000000,5000000)) +
+  scale_y_continuous(labels = unit_format(scale = 1e-6))+
+  labs(title = "Summary sales per year",
+       x = "year",
+       y = "sales (million)",
+       caption = "datasource: https://www.kaggle.com/kyanyoga")
+```
+
+**The sales performance between 2003 and 2005 revealed that the year 2004 exhibited the highest sales volume, reaching approximately $4.7 million.**
+
+## Chart 2: Summary sales in 2003-2005 by months
+```{r message=FALSE, warning=FALSE}
+
+df %>% 
+  group_by(year_id, month_id) %>%
+  summarise(sumsales = sum(sales)) %>%
+  ggplot(aes(month_id, sumsales, col = year_id)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  guides(col = FALSE) +
+  facet_wrap(~ year_id, ncol = 1) + 
+  labs(x = "Month",
+      y = "Sales",
+      title = "Sales 2003-2005 by month",
+      caption = "datasource: https://www.kaggle.com/kyanyoga") + 
+  scale_y_continuous(labels = scales::comma) + 
+  scale_color_gradient(low = "green",high = "salmon") 
+
+```
+
+**The sales performance chart, which segregates the years 2003 to 2005, indicates a similar trend line for the years 2003 and 2004. Furthermore, it reveals that November in both 2003 and 2004 experienced the highest sales volume throughout the year. Although the data for the year 2005 only showed the first five months, the trend line appears to resemble that of 2003 and 2004.**
+
+## Chart 3: Product line count in 2003-2005
+```{r message=FALSE, warning=FALSE}
+df %>%
+  ggplot(aes(productline, fill = productline, label = ..count..))+
+  geom_bar(show.legend = FALSE) +
+  geom_text(stat = "count", x_nudge = 30)+
+  theme_bw() + 
+  coord_flip()+
+  labs(
+    x = NULL,
+    y = "Transection count",
+    caption = "datasource:https://www.kaggle.com/kyanyoga"
+  )
+
+```
+
+**The chart demonstrates a significant sales segment for classic cars and vintage cars, indicating that the company has established a strong presence in the private car segment.**
+
+## Chart 4: Price/items compare with quantity/orders in each country
+```{r message=FALSE, warning=FALSE}
+set.seed(18)
+df %>% 
+  sample_n(200) %>%
+  ggplot(aes(priceeach, quantityordered, col = country))+
+  geom_point(show.legend = F) +
+  facet_wrap(~ country) + 
+  theme_bw() +
+  labs(
+    y = "quantity/orders",
+    x = "price/items",
+    caption = "datasource:https://www.kaggle.com/kyanyoga"
+    
+  )
+
+```
+
+**The chart revealed that in North America, the USA exhibits the highest purchasing frequency and tends to acquire high-priced items. In the European Union, Spain, UK and France stands out for its frequent purchases of items priced above $60.**
+
+## Chart 5: Number of dealsize in 2004
+```{r message=FALSE, warning=FALSE}
+df %>%
+  filter(year_id == 2004) %>%
+  ggplot(aes(dealsize, fill = country)) + 
+  geom_bar(show.legend = FALSE) + 
+  facet_grid(productline~country) + 
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, size = 7))+ 
+  labs(
+    x = "Dealsize",
+    y = NULL,
+    caption = "datasource:https://www.kaggle.com/kyanyoga"
+  )
+
+```
+
+**The chart illustrates the count of deal sizes across different countries and product segments. It is observed that large deal sizes do not contribute significantly to the overall count. However, within the cars segment, both medium and small deal sizes exhibit strong performance in the USA, UK, Spain, France, and Australia. Notably, the USA stands out with the highest count of medium-sized deals specifically in the classical cars segment.**
+
+
+
+
